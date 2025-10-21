@@ -3,6 +3,7 @@
   "displayName": "SVG & PNG Converter",
   "description": "Convert between SVG and PNG formats with a modern UI",
   "version": "1.0.0",
+  "publisher": "altunbas11",
   "engines": {
     "vscode": "^1.74.0"
   },
