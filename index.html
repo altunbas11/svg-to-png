@@ -297,7 +297,6 @@
         let currentSvgContent = null;
         let currentPngData = null;
 
-        // Load saved dimensions
         window.addEventListener('load', function() {
             const savedWidth = localStorage.getItem('svgToPngWidth');
             const savedHeight = localStorage.getItem('svgToPngHeight');
@@ -305,7 +304,6 @@
             if (savedHeight) heightInput.value = savedHeight;
         });
 
-        // Save dimensions on change
         widthInput.addEventListener('input', function() {
             localStorage.setItem('svgToPngWidth', widthInput.value);
         });
@@ -360,42 +358,33 @@
         }
 
         function convertSvgToPng(svgContent, width, height) {
-            // SVG'yi blob olarak oluştur
             const blob = new Blob([svgContent], { type: 'image/svg+xml' });
             const url = URL.createObjectURL(blob);
 
-            // Image elementi oluştur
             const img = new Image();
             img.onload = function() {
-                // Canvas oluştur
                 const canvas = document.createElement('canvas');
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
 
-                // Beyaz arka plan (şeffaflık istemiyorsak)
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, width, height);
 
-                // SVG'yi canvas'a çiz
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // PNG olarak dönüştür
                 canvas.toBlob(function(blob) {
                     const pngUrl = URL.createObjectURL(blob);
-                    
-                    // Önizleme göster
+
                     imagePreview.innerHTML = `<img src="${pngUrl}" alt="PNG Preview" />`;
                     previewSection.style.display = 'block';
 
-                    // İndirme bağlantısı oluştur
                     const fileName = `icon_${width}x${height}.png`;
                     downloadLink.href = pngUrl;
                     downloadLink.download = fileName;
                     downloadLink.style.display = 'inline-block';
                     downloadLink.textContent = `💾 Download ${fileName}`;
 
-                    // Eski URL'leri temizle
                     URL.revokeObjectURL(url);
                 }, 'image/png');
             };
@@ -404,26 +393,21 @@
         }
 
         function convertPngToSvg(pngData) {
-            // Create an image to get dimensions
             const img = new Image();
             img.onload = function() {
                 const width = img.naturalWidth;
                 const height = img.naturalHeight;
 
-                // Create SVG content with embedded PNG
                 const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
     <image href="${pngData}" width="${width}" height="${height}" />
 </svg>`;
 
-                // Create blob and download
                 const blob = new Blob([svgContent], { type: 'image/svg+xml' });
                 const svgUrl = URL.createObjectURL(blob);
 
-                // Preview
                 svgPreview.innerHTML = `<img src="${svgUrl}" alt="SVG Preview" style="max-width: 250px; max-height: 250px;" />`;
                 svgPreviewSection.style.display = 'block';
 
-                // Download link
                 const fileName = `image_${width}x${height}.svg`;
                 downloadSvgLink.href = svgUrl;
                 downloadSvgLink.download = fileName;
