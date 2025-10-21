@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG to PNG Converter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .converter-section {
+            margin-bottom: 30px;
+            padding: 30px;
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .converter-section:hover {
+            border-color: rgba(102, 126, 234, 0.6);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .file-input {
+            opacity: 0;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .file-input-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-input-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .size-input {
+            margin: 10px;
+            padding: 12px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+            width: 120px;
+            text-align: center;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .size-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .convert-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            margin: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .convert-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .convert-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .preview {
+            margin: 30px 0;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .preview img {
+            max-width: 250px;
+            max-height: 250px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            margin: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .download-button {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .converter-section {
+                padding: 20px;
+            }
+            .preset-sizes {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .size-input {
+                width: 80px;
+            }
+        }
+
+        .preset-sizes {
+            margin: 30px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            justify-items: center;
+        }
+
+        .preset-button {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+        }
+
+        .preset-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+            background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
+        }
+
+        .info {
+            background: linear-gradient(135deg, rgba(233, 236, 239, 0.8) 0%, rgba(206, 212, 218, 0.8) 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            color: #495057;
+            border: 1px solid rgba(233, 236, 239, 0.5);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 SVG to PNG Converter</h1>
+        
+        <div class="info">
+            <strong>SVG to PNG Converter</strong><br>
+            This tool converts your SVG files to PNG format for various uses, including icons and images.
+        </div>
+
+        <div class="converter-section">
+            <h3>Select SVG File</h3>
+            <div class="file-input-wrapper">
+                <input type="file" id="svgInput" class="file-input" accept=".svg" />
+                <label for="svgInput" class="file-input-button">📁 Select SVG File</label>
+            </div>
+            
+            <div class="preset-sizes">
+                <h4>Common Sizes:</h4>
+                <button class="preset-button" onclick="setSize(16)">16x16</button>
+                <button class="preset-button" onclick="setSize(24)">24x24</button>
+                <button class="preset-button" onclick="setSize(32)">32x32</button>
+                <button class="preset-button" onclick="setSize(48)">48x48</button>
+                <button class="preset-button" onclick="setSize(64)">64x64</button>
+                <button class="preset-button" onclick="setSize(96)">96x96</button>
+                <button class="preset-button" onclick="setSize(128)">128x128</button>
+                <button class="preset-button" onclick="setSize(256)">256x256</button>
+                <button class="preset-button" onclick="setSize(512)">512x512</button>
+            </div>
+
+            <div>
+                <label>Width: </label>
+                <input type="number" id="widthInput" class="size-input" value="128" min="16" max="512" />
+                <label>Height: </label>
+                <input type="number" id="heightInput" class="size-input" value="128" min="16" max="512" />
+            </div>
+
+            <button id="convertButton" class="convert-button" disabled>🔄 Convert to PNG</button>
+        </div>
+
+        <div class="preview" id="previewSection" style="display: none;">
+            <h3>Preview</h3>
+            <div id="imagePreview"></div>
+            <a id="downloadLink" class="download-button" style="display: none;">💾 Download PNG</a>
+        </div>
+
+        <div class="converter-section">
+            <h3>Convert PNG to SVG</h3>
+            <div class="file-input-wrapper">
+                <input type="file" id="pngInput" class="file-input" accept=".png" />
+                <label for="pngInput" class="file-input-button">📁 Select PNG File</label>
+            </div>
+            <button id="convertPngButton" class="convert-button" disabled>🔄 Convert to SVG</button>
+        </div>
+
+        <div class="preview" id="svgPreviewSection" style="display: none;">
+            <h3>SVG Preview</h3>
+            <div id="svgPreview"></div>
+            <a id="downloadSvgLink" class="download-button" style="display: none;">💾 Download SVG</a>
+        </div>
+    </div>
+
+    <script>
+        const svgInput = document.getElementById('svgInput');
+        const pngInput = document.getElementById('pngInput');
+        const widthInput = document.getElementById('widthInput');
+        const heightInput = document.getElementById('heightInput');
+        const convertButton = document.getElementById('convertButton');
+        const convertPngButton = document.getElementById('convertPngButton');
+        const previewSection = document.getElementById('previewSection');
+        const svgPreviewSection = document.getElementById('svgPreviewSection');
+        const imagePreview = document.getElementById('imagePreview');
+        const svgPreview = document.getElementById('svgPreview');
+        const downloadLink = document.getElementById('downloadLink');
+        const downloadSvgLink = document.getElementById('downloadSvgLink');
+
+        let currentSvgContent = null;
+        let currentPngData = null;
+
+        // Load saved dimensions
+        window.addEventListener('load', function() {
+            const savedWidth = localStorage.getItem('svgToPngWidth');
+            const savedHeight = localStorage.getItem('svgToPngHeight');
+            if (savedWidth) widthInput.value = savedWidth;
+            if (savedHeight) heightInput.value = savedHeight;
+        });
+
+        // Save dimensions on change
+        widthInput.addEventListener('input', function() {
+            localStorage.setItem('svgToPngWidth', widthInput.value);
+        });
+        heightInput.addEventListener('input', function() {
+            localStorage.setItem('svgToPngHeight', heightInput.value);
+        });
+
+        svgInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'image/svg+xml') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentSvgContent = e.target.result;
+                    convertButton.disabled = false;
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        pngInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'image/png') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPngData = e.target.result;
+                    convertPngButton.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        convertButton.addEventListener('click', function() {
+            if (!currentSvgContent) return;
+
+            const width = parseInt(widthInput.value);
+            const height = parseInt(heightInput.value);
+
+            convertSvgToPng(currentSvgContent, width, height);
+        });
+
+        convertPngButton.addEventListener('click', function() {
+            if (!currentPngData) return;
+
+            convertPngToSvg(currentPngData);
+        });
+
+        function setSize(size) {
+            widthInput.value = size;
+            heightInput.value = size;
+            localStorage.setItem('svgToPngWidth', size);
+            localStorage.setItem('svgToPngHeight', size);
+        }
+
+        function convertSvgToPng(svgContent, width, height) {
+            // SVG'yi blob olarak oluştur
+            const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+
+            // Image elementi oluştur
+            const img = new Image();
+            img.onload = function() {
+                // Canvas oluştur
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+
+                // Beyaz arka plan (şeffaflık istemiyorsak)
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, width, height);
+
+                // SVG'yi canvas'a çiz
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // PNG olarak dönüştür
+                canvas.toBlob(function(blob) {
+                    const pngUrl = URL.createObjectURL(blob);
+                    
+                    // Önizleme göster
+                    imagePreview.innerHTML = `<img src="${pngUrl}" alt="PNG Preview" />`;
+                    previewSection.style.display = 'block';
+
+                    // İndirme bağlantısı oluştur
+                    const fileName = `icon_${width}x${height}.png`;
+                    downloadLink.href = pngUrl;
+                    downloadLink.download = fileName;
+                    downloadLink.style.display = 'inline-block';
+                    downloadLink.textContent = `💾 Download ${fileName}`;
+
+                    // Eski URL'leri temizle
+                    URL.revokeObjectURL(url);
+                }, 'image/png');
+            };
+
+            img.src = url;
+        }
+
+        function convertPngToSvg(pngData) {
+            // Create an image to get dimensions
+            const img = new Image();
+            img.onload = function() {
+                const width = img.naturalWidth;
+                const height = img.naturalHeight;
+
+                // Create SVG content with embedded PNG
+                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    <image href="${pngData}" width="${width}" height="${height}" />
+</svg>`;
+
+                // Create blob and download
+                const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+                const svgUrl = URL.createObjectURL(blob);
+
+                // Preview
+                svgPreview.innerHTML = `<img src="${svgUrl}" alt="SVG Preview" style="max-width: 250px; max-height: 250px;" />`;
+                svgPreviewSection.style.display = 'block';
+
+                // Download link
+                const fileName = `image_${width}x${height}.svg`;
+                downloadSvgLink.href = svgUrl;
+                downloadSvgLink.download = fileName;
+                downloadSvgLink.style.display = 'inline-block';
+                downloadSvgLink.textContent = `💾 Download ${fileName}`;
+            };
+            img.src = pngData;
+        }
+    </script>
+</body>
+</html>
